@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>xyz.olivermartin.multichat</groupId>
   <artifactId>multichat</artifactId>
-  <version>1.9.6</version>
+  <version>1.9.7</version>
   <build>
     <plugins>
       <plugin>
@@ -47,7 +47,7 @@
     </repository>
     <repository>
       <id>sponge</id>
-      <url>http://repo.spongepowered.org/maven</url>
+      <url>https://repo.spongepowered.org/repository/maven-public</url>
     </repository>
     <repository>
       <id>bungeecord-repo</id>
@@ -59,11 +59,11 @@
     </repository>
     <repository>
       <id>vault-repo</id>
-      <url>http://nexus.hc.to/content/repositories/pub_releases</url>
+      <url>https://nexus.hc.to/content/repositories/pub_releases</url>
     </repository>
     <repository>
       <id>placeholderapi</id>
-      <url>http://repo.extendedclip.com/content/repositories/placeholderapi/</url>
+      <url>https://repo.extendedclip.com/content/repositories/placeholderapi/</url>
     </repository>
     <repository>
       <id>jitpack.io</id>
@@ -249,14 +249,8 @@
     <dependency>
       <groupId>net.milkbowl.vault</groupId>
       <artifactId>VaultAPI</artifactId>
-      <version>1.6</version>
+      <version>1.7</version>
       <scope>provided</scope>
-      <exclusions>
-        <exclusion>
-          <artifactId>bukkit</artifactId>
-          <groupId>org.bukkit</groupId>
-        </exclusion>
-      </exclusions>
     </dependency>
     <dependency>
       <groupId>me.clip</groupId>

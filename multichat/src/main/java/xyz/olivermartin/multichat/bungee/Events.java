@@ -617,7 +617,7 @@ public class Events implements Listener {
 
 				if (!player.hasPermission("multichat.staff.silentjoin")) {
 
-					onlineplayer.sendMessage(new ComponentBuilder(ChatColor.translateAlternateColorCodes('&', joinformat)).create());
+					onlineplayer.sendMessage(TextComponent.fromLegacyText(ChatColor.translateAlternateColorCodes('&', joinformat)));
 
 				} else {
 

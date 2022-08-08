@@ -17,7 +17,7 @@ import xyz.olivermartin.multichat.bungee.StaffChatManager;
  */
 public class MCCommand extends Command {
 
-	private static String[] aliases = new String[] {};
+	private static String[] aliases = new String[] {"st"};
 
 	public MCCommand() {
 		super("mc", "multichat.staff.mod", aliases);

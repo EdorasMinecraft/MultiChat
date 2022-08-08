@@ -18,7 +18,7 @@ import xyz.olivermartin.multichat.bungee.StaffChatManager;
  */
 public class ACCommand extends Command {
 
-	private static String[] aliases = new String[] {};
+	private static String[] aliases = new String[] {"a"};
 
 	public ACCommand() {
 		super("ac", "multichat.staff.admin", aliases);
