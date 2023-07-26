@@ -21,7 +21,7 @@ public class MultiChatUtil {
 	
 	public static String approximateHexCodes(String message) {
 
-        message = message.replaceAll("(?i)(\\&|ง)x(\\&|ง)([0-9A-F])(\\&|ง)([0-9A-F])(\\&|ง)([0-9A-F])(\\&|ง)([0-9A-F])(\\&|ง)([0-9A-F])(\\&|ง)([0-9A-F])", "&#$3$5$7$9$11$13");
+        message = message.replaceAll("(?i)(\\&|ยง)x(\\&|ยง)([0-9A-F])(\\&|ยง)([0-9A-F])(\\&|ยง)([0-9A-F])(\\&|ยง)([0-9A-F])(\\&|ยง)([0-9A-F])(\\&|ยง)([0-9A-F])", "&#$3$5$7$9$11$13");
 
         List<String> allMatches = new ArrayList<String>();
         Matcher m = Pattern.compile("(?i)\\&(x|#)([0-9A-F])([0-9A-F])([0-9A-F])([0-9A-F])([0-9A-F])([0-9A-F])")
@@ -33,7 +33,7 @@ public class MultiChatUtil {
         for (String match : allMatches) {
             String hexonly = match.split("#")[1];
             String minecraftCode = hexToMinecraft(hexonly);
-            message = message.replace(match,"ง"+minecraftCode);
+            message = message.replace(match,"ยง"+minecraftCode);
         }
 
         return message;

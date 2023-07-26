@@ -251,13 +251,13 @@ public abstract class LocalNameManager {
 	}
 
 	/*
-	 * Remove all colour / format codes from a string (using the special ง char)
+	 * Remove all colour / format codes from a string (using the special ยง char)
 	 */
 	public String stripAllFormattingCodesAndPreformattedText(String input) {
 
 		input = stripAllFormattingCodes(input);
 
-		char COLOR_CHAR = 'ง';
+		char COLOR_CHAR = 'ยง';
 		Pattern STRIP_COLOR_PATTERN = Pattern.compile("(?i)" + String.valueOf(COLOR_CHAR) + "[0-9A-FK-ORX]");
 
 		if (input == null) {

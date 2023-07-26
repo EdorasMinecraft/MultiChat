@@ -1,5 +1,6 @@
 package xyz.olivermartin.multichat.bungee;
 
+import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -43,6 +44,7 @@ public class Events implements Listener {
 	private static List<UUID> MCToggle = new ArrayList<UUID>();
 	private static List<UUID> ACToggle = new ArrayList<UUID>();
 	private static List<UUID> GCToggle = new ArrayList<UUID>();
+	private static List<UUID> usersInCooldown = new ArrayList<>();
 	public static Map<UUID, UUID> PMToggle = new HashMap<UUID, UUID>();
 
 	public static Set<UUID> hiddenStaff = new HashSet<UUID>();
@@ -139,6 +141,13 @@ public class Events implements Listener {
 	public void onChat(ChatEvent event) {
 
 		ProxiedPlayer player = (ProxiedPlayer) event.getSender();
+
+		if(Events.usersInCooldown.contains(player.getUniqueId())){
+			String userInCooldown = ConfigManager.getInstance().getHandler("messages.yml").getConfig().getString("anti_spam_join_cooldown");
+			player.disconnect(TextComponent.fromLegacyText(ChatColor.translateAlternateColorCodes('&', userInCooldown)));
+			event.setCancelled(true);
+			return;
+		}
 
 		// New null pointer checks
 		if (player.getServer() == null) {
@@ -417,6 +426,9 @@ public class Events implements Listener {
 		UUID uuid = player.getUniqueId();
 		boolean firstJoin = false;
 
+		// usersInCooldown previene spam de chat y spam de join/leave
+		Events.usersInCooldown.add(uuid);
+
 		if (player.hasPermission("multichat.staff.mod")) {
 
 			if (!MultiChat.modchatpreferences.containsKey(uuid)) {
@@ -493,60 +505,69 @@ public class Events implements Listener {
 
 		ConsoleManager.log("Refreshed UUID-Name lookup: " + uuid.toString());
 
-		if ( ConfigManager.getInstance().getHandler("joinmessages.yml").getConfig().getBoolean("showjoin") == true ) {
+		if (ConfigManager.getInstance().getHandler("joinmessages.yml").getConfig().getBoolean("showjoin")) {
 			
 			// PremiumVanish support, return as early as possible to avoid loading unnecessary resources
 			if (MultiChat.premiumVanish && MultiChat.hideVanishedStaffInJoin && BungeeVanishAPI.isInvisible(player)) {
 				return;
 			}
-			
-			String joinformat = ConfigManager.getInstance().getHandler("joinmessages.yml").getConfig().getString("serverjoin");
-			String silentformat = ConfigManager.getInstance().getHandler("joinmessages.yml").getConfig().getString("silentjoin");
-			String welcomeMessage = ConfigManager.getInstance().getHandler("joinmessages.yml").getConfig().getString("welcome_message");
-			String privateWelcomeMessage = ConfigManager.getInstance().getHandler("joinmessages.yml").getConfig().getString("private_welcome_message");
 
-			ChatManipulation chatman = new ChatManipulation();
+			// Comprobamos que tras 1 segundo sigue conectado. Si lo está, seguimos.
+			boolean finalFirstJoin = firstJoin;
+			ProxyServer.getInstance().getScheduler().schedule(ProxyServer.getInstance().getPluginManager().getPlugin("MultiChat"), () -> {
+				if(player.isConnected()){
+					Events.usersInCooldown.remove(uuid);
 
-			joinformat = chatman.replaceJoinMsgVars(joinformat, player.getName());
-			silentformat = chatman.replaceJoinMsgVars(silentformat, player.getName());
-			welcomeMessage = chatman.replaceJoinMsgVars(welcomeMessage, player.getName());
-			privateWelcomeMessage = chatman.replaceJoinMsgVars(privateWelcomeMessage, player.getName());
+					String joinformat = ConfigManager.getInstance().getHandler("joinmessages.yml").getConfig().getString("serverjoin");
+					String silentformat = ConfigManager.getInstance().getHandler("joinmessages.yml").getConfig().getString("silentjoin");
+					String welcomeMessage = ConfigManager.getInstance().getHandler("joinmessages.yml").getConfig().getString("welcome_message");
+					String privateWelcomeMessage = ConfigManager.getInstance().getHandler("joinmessages.yml").getConfig().getString("private_welcome_message");
 
-			boolean broadcastWelcome = true;
-			if (ConfigManager.getInstance().getHandler("joinmessages.yml").getConfig().contains("welcome")) {
-				broadcastWelcome = ConfigManager.getInstance().getHandler("joinmessages.yml").getConfig().getBoolean("welcome");
-			}
+					ChatManipulation chatman = new ChatManipulation();
 
-			boolean privateWelcome = false;
-			if (ConfigManager.getInstance().getHandler("joinmessages.yml").getConfig().contains("private_welcome")) {
-				privateWelcome = ConfigManager.getInstance().getHandler("joinmessages.yml").getConfig().getBoolean("private_welcome");
-			}
-			
-			boolean broadcastJoin = !player.hasPermission("multichat.staff.silentjoin");
-			for (ProxiedPlayer onlineplayer : ProxyServer.getInstance().getPlayers()) {
+					joinformat = chatman.replaceJoinMsgVars(joinformat, player.getName());
+					silentformat = chatman.replaceJoinMsgVars(silentformat, player.getName());
+					welcomeMessage = chatman.replaceJoinMsgVars(welcomeMessage, player.getName());
+					privateWelcomeMessage = chatman.replaceJoinMsgVars(privateWelcomeMessage, player.getName());
 
-				if (broadcastJoin) {
-
-					if (firstJoin && broadcastWelcome) {
-						onlineplayer.sendMessage(TextComponent.fromLegacyText(ChatColor.translateAlternateColorCodes('&', welcomeMessage)));
+					boolean broadcastWelcome = true;
+					if (ConfigManager.getInstance().getHandler("joinmessages.yml").getConfig().contains("welcome")) {
+						broadcastWelcome = ConfigManager.getInstance().getHandler("joinmessages.yml").getConfig().getBoolean("welcome");
 					}
 
-					if (firstJoin && privateWelcome && onlineplayer.getName().equals(player.getName())) {
-						onlineplayer.sendMessage(TextComponent.fromLegacyText(ChatColor.translateAlternateColorCodes('&', privateWelcomeMessage)));
+					boolean privateWelcome = false;
+					if (ConfigManager.getInstance().getHandler("joinmessages.yml").getConfig().contains("private_welcome")) {
+						privateWelcome = ConfigManager.getInstance().getHandler("joinmessages.yml").getConfig().getBoolean("private_welcome");
 					}
 
-					onlineplayer.sendMessage(TextComponent.fromLegacyText(ChatColor.translateAlternateColorCodes('&', joinformat)));
+					boolean broadcastJoin = !player.hasPermission("multichat.staff.silentjoin");
 
-				} else {
+					for (ProxiedPlayer onlineplayer : ProxyServer.getInstance().getPlayers()) {
 
-					hiddenStaff.add(player.getUniqueId());
+						if (broadcastJoin) {
 
-					if (onlineplayer.hasPermission("multichat.staff.silentjoin") ) {
-						onlineplayer.sendMessage(TextComponent.fromLegacyText(ChatColor.translateAlternateColorCodes('&', silentformat)));
+							if (finalFirstJoin && broadcastWelcome) {
+								onlineplayer.sendMessage(TextComponent.fromLegacyText(ChatColor.translateAlternateColorCodes('&', welcomeMessage)));
+							}
+
+							if (finalFirstJoin && privateWelcome && onlineplayer.getName().equals(player.getName())) {
+								onlineplayer.sendMessage(TextComponent.fromLegacyText(ChatColor.translateAlternateColorCodes('&', privateWelcomeMessage)));
+							}
+
+							onlineplayer.sendMessage(TextComponent.fromLegacyText(ChatColor.translateAlternateColorCodes('&', joinformat)));
+
+						} else {
+
+							hiddenStaff.add(player.getUniqueId());
+
+							if (onlineplayer.hasPermission("multichat.staff.silentjoin") ) {
+								onlineplayer.sendMessage(TextComponent.fromLegacyText(ChatColor.translateAlternateColorCodes('&', silentformat)));
+							}
+
+						}
 					}
-
 				}
-			}
+			}, 500, TimeUnit.MILLISECONDS);
 		}
 	}
 
@@ -613,18 +634,22 @@ public class Events implements Listener {
 			joinformat = chatman.replaceJoinMsgVars(joinformat, player.getName());
 			silentformat = chatman.replaceJoinMsgVars(silentformat, player.getName());
 
-			for (ProxiedPlayer onlineplayer : ProxyServer.getInstance().getPlayers()) {
+			if(!Events.usersInCooldown.contains(uuid)){
+				for (ProxiedPlayer onlineplayer : ProxyServer.getInstance().getPlayers()) {
 
-				if (!player.hasPermission("multichat.staff.silentjoin")) {
+					if (!player.hasPermission("multichat.staff.silentjoin")) {
 
-					onlineplayer.sendMessage(TextComponent.fromLegacyText(ChatColor.translateAlternateColorCodes('&', joinformat)));
+						onlineplayer.sendMessage(TextComponent.fromLegacyText(ChatColor.translateAlternateColorCodes('&', joinformat)));
 
-				} else {
+					} else {
 
-					if (onlineplayer.hasPermission("multichat.staff.silentjoin") ) {
-						onlineplayer.sendMessage(new ComponentBuilder(ChatColor.translateAlternateColorCodes('&', silentformat)).create());
+						if (onlineplayer.hasPermission("multichat.staff.silentjoin") ) {
+							onlineplayer.sendMessage(new ComponentBuilder(ChatColor.translateAlternateColorCodes('&', silentformat)).create());
+						}
 					}
 				}
+			} else {
+				Events.usersInCooldown.remove(uuid);
 			}
 		}
 	}

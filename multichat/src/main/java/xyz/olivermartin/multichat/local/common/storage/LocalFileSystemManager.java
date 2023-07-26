@@ -8,7 +8,6 @@ import java.nio.file.Files;
 
 import xyz.olivermartin.multichat.local.common.MultiChatLocalPlatform;
 import xyz.olivermartin.multichat.local.spigot.LocalSpigotNicknameFile;
-import xyz.olivermartin.multichat.local.sponge.LocalSpongeNicknameFile;
 
 public class LocalFileSystemManager {
 
@@ -32,9 +31,6 @@ public class LocalFileSystemManager {
 		switch (platform) {
 		case SPIGOT:
 			nicknameFile = new LocalSpigotNicknameFile(configPath, fileName, lfnm);
-			break;
-		case SPONGE:
-			nicknameFile = new LocalSpongeNicknameFile(configPath, fileName, lfnm);
 			break;
 		default:
 			throw new IllegalArgumentException("Could not register file because this type of platform is not allowed.");

@@ -4,7 +4,6 @@ import java.io.File;
 
 import xyz.olivermartin.multichat.local.common.MultiChatLocalPlatform;
 import xyz.olivermartin.multichat.local.spigot.LocalSpigotConfig;
-import xyz.olivermartin.multichat.local.sponge.LocalSpongeConfig;
 
 /**
  * MultiChatLocal's Config Manager
@@ -36,9 +35,6 @@ public class LocalConfigManager {
 		switch (platform) {
 		case SPIGOT:
 			localConfig = new LocalSpigotConfig(configPath, fileName);
-			break;
-		case SPONGE:
-			localConfig = new LocalSpongeConfig(configPath, fileName);
 			break;
 		default:
 			throw new IllegalArgumentException("Could not register config because this type of platform is not allowed.");
