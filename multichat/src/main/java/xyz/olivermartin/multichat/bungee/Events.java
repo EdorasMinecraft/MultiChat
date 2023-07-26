@@ -424,6 +424,7 @@ public class Events implements Listener {
 
 		ProxiedPlayer player = event.getPlayer();
 		UUID uuid = player.getUniqueId();
+		String playerName = player.getName();
 		boolean firstJoin = false;
 
 		// usersInCooldown previene spam de chat y spam de join/leave
@@ -564,6 +565,19 @@ public class Events implements Listener {
 								onlineplayer.sendMessage(TextComponent.fromLegacyText(ChatColor.translateAlternateColorCodes('&', silentformat)));
 							}
 
+						}
+					}
+				} else {
+					// anti_spam_join_trigger
+					for(ProxiedPlayer p : ProxyServer.getInstance().getPlayers()){
+						if (p.hasPermission("multichat.staff.admin") ) {
+							if(finalFirstJoin){
+								String trigger = ConfigManager.getInstance().getHandler("messages.yml").getConfig().getString("anti_spam_join_trigger_new");
+								p.sendMessage(TextComponent.fromLegacyText(ChatColor.translateAlternateColorCodes('&', trigger.replace("%PLAYER%", playerName))));
+							} else {
+								String trigger = ConfigManager.getInstance().getHandler("messages.yml").getConfig().getString("anti_spam_join_trigger");
+								p.sendMessage(TextComponent.fromLegacyText(ChatColor.translateAlternateColorCodes('&', trigger.replace("%PLAYER%", playerName))));
+							}
 						}
 					}
 				}

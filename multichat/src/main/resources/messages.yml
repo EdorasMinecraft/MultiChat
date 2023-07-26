@@ -368,3 +368,5 @@ anti_spam_cooldown: "&cANTI-SPAM: Your messages have been blocked. You cannot ch
 
 # Custom
 anti_spam_join_cooldown: "&c¡Vas muy rápido! Acabas de conectarte, espera antes de poder enviar un mensaje."
+anti_spam_join_trigger: "&c%PLAYER% ha intentado entrar al servidor pero no tuvo éxito. ¿Versión incorrecta? ¿Bot?"
+anti_spam_join_trigger_new: "&c%PLAYER% (nuevo) ha intentado entrar al servidor pero no tuvo éxito. ¿Versión incorrecta? ¿Bot?"
