@@ -510,6 +510,7 @@ public class Events implements Listener {
 			
 			// PremiumVanish support, return as early as possible to avoid loading unnecessary resources
 			if (MultiChat.premiumVanish && MultiChat.hideVanishedStaffInJoin && BungeeVanishAPI.isInvisible(player)) {
+                Events.usersInCooldown.remove(uuid);
 				return;
 			}
 
